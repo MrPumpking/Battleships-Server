@@ -1,33 +1,21 @@
 package me.pumpking.battleships.models;
 
-public class Area {
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
+@AllArgsConstructor
+class Area {
+
+  @Getter
   private int xMin;
+
+  @Getter
   private int yMin;
+
+  @Getter
   private int xMax;
+
+  @Getter
   private int yMax;
-
-  public Area(int xMin, int yMin, int xMax, int yMax) {
-    this.xMin = xMin;
-    this.yMin = yMin;
-    this.xMax = xMax;
-    this.yMax = yMax;
-  }
-
-  public int getXMin() {
-    return xMin;
-  }
-
-  public int getYMin() {
-    return yMin;
-  }
-
-  public int getXMax() {
-    return xMax;
-  }
-
-  public int getYMax() {
-    return yMax;
-  }
 
 }

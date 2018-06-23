@@ -2,17 +2,24 @@ package me.pumpking.battleships.models;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
-import me.pumpking.battleships.exceptions.IllegalShipPositionException;
-
 import java.util.HashMap;
 import java.util.Map;
+import lombok.AccessLevel;
+import lombok.Getter;
+import me.pumpking.battleships.exceptions.IllegalShipPositionException;
 
 public class Board {
 
   private int width;
   private int height;
+
+  @Getter(AccessLevel.PACKAGE)
   private int nextID;
+
+  @Getter(AccessLevel.PACKAGE)
   private int[] fields;
+
+  @Getter(AccessLevel.PACKAGE)
   private Map<Integer, Ship> placedShips;
 
   public Board(int width, int height) {
@@ -143,21 +150,6 @@ public class Board {
       }
       System.out.println();
     }
-  }
-
-  @VisibleForTesting
-  int[] getFields() {
-    return fields;
-  }
-
-  @VisibleForTesting
-  int getNextID() {
-    return nextID;
-  }
-
-  @VisibleForTesting
-  Map<Integer, Ship> getPlacedShips() {
-    return placedShips;
   }
 
 }
