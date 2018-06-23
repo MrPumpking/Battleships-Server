@@ -6,30 +6,30 @@ import java.util.List;
 
 public final class Ship {
 
-    private List<Coordinates> parts;
+  private List<Coordinates> parts;
 
-    public Ship() {
-        this.parts = new ArrayList<>();
-    }
+  public Ship() {
+    this.parts = new ArrayList<>();
+  }
 
-    public void addPart(Coordinates coordinates) {
-        parts.add(coordinates);
-    }
+  public void addPart(Coordinates coordinates) {
+    parts.add(coordinates);
+  }
 
-    public void removePart(Coordinates coordinates) {
-        parts.remove(coordinates);
-    }
+  public void removePart(Coordinates coordinates) {
+    parts.remove(coordinates);
+  }
 
-    public void removePart(int x, int y) {
-        parts.removeIf(coordinates -> coordinates.getX() == x && coordinates.getY() == y);
-    }
+  public void removePart(int x, int y) {
+    parts.removeIf(coordinates -> coordinates.getX() == x && coordinates.getY() == y);
+  }
 
-    public boolean hasSunk() {
-        return parts.isEmpty();
-    }
+  public boolean hasSunk() {
+    return parts.isEmpty();
+  }
 
-    public List<Coordinates> getParts() {
-        return Collections.unmodifiableList(parts);
-    }
+  public List<Coordinates> getParts() {
+    return Collections.unmodifiableList(parts);
+  }
 
 }

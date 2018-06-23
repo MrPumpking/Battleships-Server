@@ -5,9 +5,9 @@ import org.junit.Test;
 
 public class CoordinatesTest {
 
-    @Test
-    public void equalsContract() {
-        EqualsVerifier.forClass(Coordinates.class).verify();
-    }
+  @Test
+  public void equalsContract() {
+    EqualsVerifier.forClass(Coordinates.class).verify();
+  }
 
 }

@@ -1,17 +1,17 @@
 package me.pumpking.battleships.models;
 
 public enum Orientation {
-    VERTICAL("vertical"),
-    HORIZONTAL("horizontal");
+  VERTICAL("vertical"),
+  HORIZONTAL("horizontal");
 
-    private String value;
+  private String value;
 
-    Orientation(String value) {
-        this.value = value;
-    }
+  Orientation(String value) {
+    this.value = value;
+  }
 
-    public String getValue() {
-        return value;
-    }
+  public String getValue() {
+    return value;
+  }
 
 }
