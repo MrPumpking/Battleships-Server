@@ -1,8 +1,11 @@
 package me.pumpking.battleships.models;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
-import me.pumpking.battleships.exceptions.IllegalShipPositionException;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -10,8 +13,18 @@ public class BoardTest {
 
   private Board board;
 
-  private static final int WIDTH = 10;
-  private static final int HEIGHT = 10;
+  public static final int WIDTH = 10;
+  public static final int HEIGHT = 10;
+
+  public static Board createBoardMock(int width, int height) {
+    Board board = spy(Board.class);
+    int[] fields = new int[width * height];
+    when(board.getWidth()).thenReturn(width);
+    when(board.getHeight()).thenReturn(height);
+    when(board.getFields()).thenReturn(fields);
+    board.clear();
+    return board;
+  }
 
   @Before
   public void before() {
@@ -24,10 +37,23 @@ public class BoardTest {
   }
 
   @Test
+  public void checkInstantiation() {
+    assertThat(board.getCurrentID()).isEqualTo(1);
+    assertThat(board.getPlacedShips()).isNotNull();
+    assertThat(board.getFields()).hasSize(WIDTH * HEIGHT);
+  }
+
+  @Test
+  public void checkInstantiationForEmptyConstructor() {
+    assertThat(board.getCurrentID()).isEqualTo(1);
+    assertThat(board.getPlacedShips()).isNotNull();
+  }
+
+  @Test
   public void checkIfBoardGetsCleared() {
     board.setShipIDAt(0, 0, 1);
     board.clear();
-    assertThat(board.getNextID()).isEqualTo(1);
+    assertThat(board.getCurrentID()).isEqualTo(1);
     assertThat(board.getPlacedShips()).isEmpty();
     assertThat(board.getFields()).containsOnly(0);
   }
@@ -54,14 +80,14 @@ public class BoardTest {
     assertThat(board.getShipIDAt(0, 0)).isEqualTo(1);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void getAreaSurroundingShipWithInvalidCoordinates() {
-    board.getAreaSurroundingShip(-1, 0, 0, 0);
+  @Test(expected = NullPointerException.class)
+  public void getAreaAroundAreaWithNull() {
+    board.getAreaAroundArea(null);
   }
 
   @Test
-  public void getAreaSurroundingShip() {
-    Area area = board.getAreaSurroundingShip(1, 1, 1, 3);
+  public void getAreaAroundArea() {
+    Area area = board.getAreaAroundArea(new Area(1, 1, 1, 3));
     assertThat(area.getXMin()).isEqualTo(0);
     assertThat(area.getYMin()).isEqualTo(0);
     assertThat(area.getXMax()).isEqualTo(2);
@@ -69,8 +95,8 @@ public class BoardTest {
   }
 
   @Test
-  public void getAreaSurroundingShipPlacedByTheWall() {
-    Area area = board.getAreaSurroundingShip(0, 0, 0, 3);
+  public void getAreaAroundAreaAdjacentToBoardBorder() {
+    Area area = board.getAreaAroundArea(new Area(0, 0, 0, 3));
     assertThat(area.getXMin()).isEqualTo(0);
     assertThat(area.getYMin()).isEqualTo(0);
     assertThat(area.getXMax()).isEqualTo(1);
@@ -95,53 +121,25 @@ public class BoardTest {
     assertThat(board.isAreaInBoardEmpty(area)).isEqualTo(false);
   }
 
-  @Test(expected = IllegalArgumentException.class)
-  public void placeShipWithInvalidCoordinates() throws IllegalShipPositionException {
-    board.placeShip(-1, 0, Orientation.HORIZONTAL, ShipType.BATTLESHIP);
-  }
-
   @Test(expected = NullPointerException.class)
-  public void placeShipWithNullOrientation() throws IllegalShipPositionException {
-    board.placeShip(0, 0, null, ShipType.BATTLESHIP);
-  }
-
-  @Test(expected = NullPointerException.class)
-  public void placeShipWithNullShipType() throws IllegalShipPositionException {
-    board.placeShip(0, 0, Orientation.HORIZONTAL, null);
+  public void addNullShipToBoard() {
+    board.addShipToBoard(null);
   }
 
   @Test
-  public void placeShipHorizontal() throws IllegalShipPositionException {
-    board.placeShip(0, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
+  public void addShipToBoard() {
+    Ship ship = mock(Ship.class);
+    when(ship.getParts()).thenReturn(Arrays.asList(
+        new Coordinates(0, 0),
+        new Coordinates(1, 0),
+        new Coordinates(2, 0)
+    ));
+    board.addShipToBoard(ship);
     assertThat(board.getShipIDAt(0, 0)).isEqualTo(1);
     assertThat(board.getShipIDAt(1, 0)).isEqualTo(1);
-  }
-
-  @Test
-  public void placeShipVertical() throws IllegalShipPositionException {
-    board.placeShip(0, 0, Orientation.VERTICAL, ShipType.DESTROYER);
-    assertThat(board.getShipIDAt(0, 0)).isEqualTo(1);
-    assertThat(board.getShipIDAt(0, 1)).isEqualTo(1);
-  }
-
-  @Test
-  public void placeShipCrossingBorderHorizontally() throws IllegalShipPositionException {
-    board.placeShip(WIDTH - 1, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
-    assertThat(board.getShipIDAt(WIDTH - 1, 0)).isEqualTo(1);
-    assertThat(board.getShipIDAt(0, 0)).isEqualTo(1);
-  }
-
-  @Test
-  public void placeShipCrossingBorderVertically() throws IllegalShipPositionException {
-    board.placeShip(0, HEIGHT - 1, Orientation.VERTICAL, ShipType.DESTROYER);
-    assertThat(board.getShipIDAt(0, HEIGHT - 1)).isEqualTo(1);
-    assertThat(board.getShipIDAt(0, 0)).isEqualTo(1);
-  }
-
-  @Test(expected = IllegalShipPositionException.class)
-  public void placeShipCollidingWithAnotherShip() throws IllegalShipPositionException {
-    board.placeShip(0, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
-    board.placeShip(2, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
+    assertThat(board.getShipIDAt(2, 0)).isEqualTo(1);
+    assertThat(board.getPlacedShips()).containsKeys(1);
+    assertThat(board.getPlacedShips().get(1)).isEqualTo(ship);
   }
 
 }

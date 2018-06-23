@@ -24,9 +24,12 @@ public enum ShipType {
     this.size = size;
   }
 
+  public static ShipType getLargestShipType() {
+    return Collections.max(Arrays.asList(values()), Comparator.comparing(ShipType::getSize));
+  }
+
   public static int getLargestShipSize() {
-    return Collections
-        .max(Arrays.asList(values()), Comparator.comparing(ShipType::getSize)).size;
+    return getLargestShipType().size;
   }
 
 }

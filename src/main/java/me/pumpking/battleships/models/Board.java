@@ -6,28 +6,38 @@ import java.util.HashMap;
 import java.util.Map;
 import lombok.AccessLevel;
 import lombok.Getter;
-import me.pumpking.battleships.exceptions.IllegalShipPositionException;
 
 public class Board {
 
+  @Getter
   private int width;
+
+  @Getter
   private int height;
 
+  @VisibleForTesting
   @Getter(AccessLevel.PACKAGE)
-  private int nextID;
+  private int currentID;
 
+  @VisibleForTesting
   @Getter(AccessLevel.PACKAGE)
   private int[] fields;
 
-  @Getter(AccessLevel.PACKAGE)
+  @Getter
   private Map<Integer, Ship> placedShips;
+
+  @VisibleForTesting
+  Board() {
+    this.currentID = 1;
+    this.placedShips = new HashMap<>();
+  }
 
   public Board(int width, int height) {
     int largestShipSize = ShipType.getLargestShipSize();
     Preconditions.checkArgument(width >= largestShipSize && height >= largestShipSize,
         "Cannot create board smaller than the biggest ship size");
 
-    this.nextID = 1;
+    this.currentID = 1;
     this.width = width;
     this.height = height;
     this.fields = new int[width * height];
@@ -35,34 +45,43 @@ public class Board {
   }
 
   public void clear() {
-    nextID = 1;
+    currentID = 1;
     placedShips.clear();
 
-    for (int i = 0; i < fields.length; i++) {
-      fields[i] = 0;
+    for (int i = 0; i < getFields().length; i++) {
+      getFields()[i] = 0;
     }
   }
 
+  private void checkCoordinates(int x, int y) {
+    Preconditions.checkArgument(x >= 0 && y >= 0, "Coordinates cannot be smaller than 0");
+    Preconditions.checkArgument(x < getWidth() && y < getHeight(),
+        "Coordinates cannot be larger than board");
+  }
+
   public int getShipIDAt(int x, int y) {
-    Preconditions.checkArgument(x >= 0 && y >= 0 && x < width && y < height, "Invalid coordinates");
-    return fields[y * width + x];
+    checkCoordinates(x, y);
+    return getFields()[y * getWidth() + x];
   }
 
   public void setShipIDAt(int x, int y, int id) {
-    Preconditions.checkArgument(x >= 0 && y >= 0 && x < width && y < height, "Invalid coordinates");
-    fields[y * width + x] = id;
+    checkCoordinates(x, y);
+    getFields()[y * getWidth() + x] = id;
+  }
+
+  public void addShipToBoard(Ship ship) {
+    ship.getParts().forEach(coords -> setShipIDAt(coords.getX(), coords.getY(), currentID));
+    placedShips.put(currentID++, ship);
   }
 
   @VisibleForTesting
-  Area getAreaSurroundingShip(int shipXStart, int shipYStart, int shipXEnd, int shipYEnd) {
-    Preconditions
-        .checkArgument(shipXStart >= 0 && shipYStart >= 0 && shipXEnd < width && shipYEnd < height,
-            "Invalid coordinates");
+  Area getAreaAroundArea(Area area) {
+    Preconditions.checkNotNull(area, "Cannot get surrounding area for null");
 
-    int xMin = Math.max(shipXStart - 1, 0);
-    int yMin = Math.max(shipYStart - 1, 0);
-    int xMax = Math.min(shipXEnd + 1, width - 1);
-    int yMax = Math.min(shipYEnd + 1, height - 1);
+    int xMin = Math.max(area.getXMin() - 1, 0);
+    int yMin = Math.max(area.getYMin() - 1, 0);
+    int xMax = Math.min(area.getXMax() + 1, getWidth() - 1);
+    int yMax = Math.min(area.getYMax() + 1, getHeight() - 1);
     return new Area(xMin, yMin, xMax, yMax);
   }
 
@@ -78,78 +97,6 @@ public class Board {
       }
     }
     return true;
-  }
-
-  public void placeShip(int xStart, int yStart, Orientation orientation, ShipType shipType)
-      throws IllegalShipPositionException {
-    Preconditions.checkNotNull(shipType, "ShipType cannot be null");
-    Preconditions.checkNotNull(orientation, "Orientation cannot be null");
-    Preconditions.checkArgument(xStart >= 0 && yStart >= 0 && xStart < width && yStart < height,
-        "Invalid coordinates");
-
-    boolean isPlacedCorrectly;
-    boolean isCrossingTheBorder = false;
-    int additionalShipParts = shipType.getSize() - 1;
-    boolean isVertical = orientation == Orientation.VERTICAL;
-
-    int xEnd = (isVertical ? xStart : xStart + additionalShipParts);
-    int yEnd = (isVertical ? yStart + additionalShipParts : yStart);
-
-    if (xEnd >= width || yEnd >= height) {
-      isCrossingTheBorder = true;
-
-      xEnd = (isVertical ? xEnd : xEnd - width);
-      yEnd = (isVertical ? yEnd - height : yEnd);
-
-      Area firstPart = getAreaSurroundingShip(xStart, yStart, (isVertical ? xStart : width - 1),
-          (isVertical ? height - 1 : yStart));
-      Area secondPart = getAreaSurroundingShip(xEnd, yEnd, (isVertical ? xEnd : 0),
-          (isVertical ? 0 : yEnd));
-
-      isPlacedCorrectly = isAreaInBoardEmpty(firstPart) && isAreaInBoardEmpty(secondPart);
-
-    } else {
-      isPlacedCorrectly = isAreaInBoardEmpty(getAreaSurroundingShip(xStart, yStart, xEnd, yEnd));
-    }
-
-    if (!isPlacedCorrectly) {
-      throw new IllegalShipPositionException(xStart, yStart);
-    }
-
-    Ship ship = new Ship();
-
-    if (!isCrossingTheBorder) {
-      for (int i = 0; i < shipType.getSize(); i++) {
-        ship.addPart(
-            new Coordinates((isVertical ? xStart : xStart++), (isVertical ? yStart++ : yStart)));
-      }
-    } else {
-      int firstHalfParts = (isVertical ? height - yStart : width - xStart);
-      int secondHalfParts = (isVertical ? yEnd : xEnd) + 1;
-
-      for (int i = 0; i < firstHalfParts; i++) {
-        ship.addPart(
-            new Coordinates((isVertical ? xStart : xStart++), (isVertical ? yStart++ : yStart)));
-      }
-
-      for (int i = 0; i < secondHalfParts; i++) {
-        ship.addPart(new Coordinates((isVertical ? xEnd : xEnd--), (isVertical ? yEnd-- : yEnd)));
-      }
-    }
-
-    ship.getParts()
-        .forEach(coordinates -> setShipIDAt(coordinates.getX(), coordinates.getY(), nextID));
-    placedShips.put(nextID, ship);
-    nextID++;
-  }
-
-  public void print() {
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < width; x++) {
-        System.out.print(getShipIDAt(x, y) + " ");
-      }
-      System.out.println();
-    }
   }
 
 }
