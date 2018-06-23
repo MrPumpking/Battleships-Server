@@ -24,7 +24,7 @@ public class BoardTest {
   }
 
   @Test
-  public void clear() {
+  public void checkIfBoardGetsCleared() {
     board.setShipIDAt(0, 0, 1);
     board.clear();
     assertThat(board.getNextID()).isEqualTo(1);
