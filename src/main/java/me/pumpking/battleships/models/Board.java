@@ -2,6 +2,7 @@ package me.pumpking.battleships.models;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.AccessLevel;
@@ -41,10 +42,7 @@ public class Board {
   public void clear() {
     currentID = 1;
     placedShips.clear();
-
-    for (int i = 0; i < fields.length; i++) {
-      fields[i] = 0;
-    }
+    Arrays.fill(fields, 0);
   }
 
   private void checkCoordinates(int x, int y) {
