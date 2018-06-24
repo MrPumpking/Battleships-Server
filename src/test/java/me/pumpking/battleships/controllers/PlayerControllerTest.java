@@ -6,7 +6,6 @@ import static org.mockito.Mockito.when;
 
 import me.pumpking.battleships.exceptions.IllegalShipPositionException;
 import me.pumpking.battleships.models.Board;
-import me.pumpking.battleships.models.BoardTest;
 import me.pumpking.battleships.models.Orientation;
 import me.pumpking.battleships.models.Player;
 import me.pumpking.battleships.models.ShipType;
@@ -17,12 +16,12 @@ public class PlayerControllerTest {
 
   private PlayerController controller;
 
-  private static final int WIDTH = 10;
-  private static final int HEIGHT = 10;
+  private static final int BOARD_WIDTH = 10;
+  private static final int BOARD_HEIGHT = 10;
 
   @Before
   public void before() {
-    Board board = BoardTest.createBoardMock(WIDTH, HEIGHT);
+    Board board = new Board(BOARD_WIDTH, BOARD_HEIGHT);
     Player player = mock(Player.class);
     when(player.getBoard()).thenReturn(board);
 
@@ -60,15 +59,15 @@ public class PlayerControllerTest {
 
   @Test
   public void placeShipCrossingBorderHorizontally() throws IllegalShipPositionException {
-    controller.placeShip(WIDTH - 1, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
-    assertThat(controller.getPlayer().getBoard().getShipIDAt(WIDTH - 1, 0)).isEqualTo(1);
+    controller.placeShip(BOARD_WIDTH - 1, 0, Orientation.HORIZONTAL, ShipType.DESTROYER);
+    assertThat(controller.getPlayer().getBoard().getShipIDAt(BOARD_WIDTH - 1, 0)).isEqualTo(1);
     assertThat(controller.getPlayer().getBoard().getShipIDAt(0, 0)).isEqualTo(1);
   }
 
   @Test
   public void placeShipCrossingBorderVertically() throws IllegalShipPositionException {
-    controller.placeShip(0, HEIGHT - 1, Orientation.VERTICAL, ShipType.DESTROYER);
-    assertThat(controller.getPlayer().getBoard().getShipIDAt(0, HEIGHT - 1)).isEqualTo(1);
+    controller.placeShip(0, BOARD_HEIGHT - 1, Orientation.VERTICAL, ShipType.DESTROYER);
+    assertThat(controller.getPlayer().getBoard().getShipIDAt(0, BOARD_HEIGHT - 1)).isEqualTo(1);
     assertThat(controller.getPlayer().getBoard().getShipIDAt(0, 0)).isEqualTo(1);
   }
 

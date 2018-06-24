@@ -14,8 +14,8 @@ public class ShipTest {
 
   @Before
   public void before() {
-    board = BoardTest
-        .createBoardMock(ShipType.getLargestShipSize() + 1, ShipType.getLargestShipSize() + 1);
+    int boardSize = ShipType.getLargestShipSize() + 1;
+    board = new Board(boardSize, boardSize);
     ship = new Ship(board, 0, 0, Orientation.HORIZONTAL, SHIP_TYPE);
     ship.populateParts();
   }
@@ -57,8 +57,6 @@ public class ShipTest {
 
   @Test
   public void checkPartPopulationWhenNotCrossingTheBorder() {
-    Board board = BoardTest
-        .createBoardMock(ShipType.SUBMARINE.getSize() + 1, ShipType.SUBMARINE.getSize() + 1);
     Ship ship = new Ship(board, 0, 0, Orientation.HORIZONTAL, ShipType.SUBMARINE);
     ship.populateParts();
 
@@ -71,14 +69,13 @@ public class ShipTest {
 
   @Test
   public void checkPartPopulationWhenCrossingTheBorder() {
-    Board board = BoardTest
-        .createBoardMock(ShipType.SUBMARINE.getSize() + 1, ShipType.SUBMARINE.getSize() + 1);
-    Ship ship = new Ship(board, 2, 0, Orientation.HORIZONTAL, ShipType.SUBMARINE);
+    Ship ship = new Ship(board, board.getWidth() - 2, 0, Orientation.HORIZONTAL,
+        ShipType.SUBMARINE);
     ship.populateParts();
 
     assertThat(ship.getParts()).containsExactly(
-        new Coordinates(2, 0),
-        new Coordinates(3, 0),
+        new Coordinates(board.getWidth() - 2, 0),
+        new Coordinates(board.getWidth() - 1, 0),
         new Coordinates(0, 0)
     );
   }

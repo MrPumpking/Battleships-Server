@@ -2,7 +2,6 @@ package me.pumpking.battleships.models;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -13,18 +12,8 @@ public class BoardTest {
 
   private Board board;
 
-  public static final int WIDTH = 10;
-  public static final int HEIGHT = 10;
-
-  public static Board createBoardMock(int width, int height) {
-    Board board = spy(Board.class);
-    int[] fields = new int[width * height];
-    when(board.getWidth()).thenReturn(width);
-    when(board.getHeight()).thenReturn(height);
-    when(board.getFields()).thenReturn(fields);
-    board.clear();
-    return board;
-  }
+  private static final int WIDTH = 10;
+  private static final int HEIGHT = 10;
 
   @Before
   public void before() {

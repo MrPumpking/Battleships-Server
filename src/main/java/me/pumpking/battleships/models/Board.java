@@ -26,12 +26,6 @@ public class Board {
   @Getter
   private Map<Integer, Ship> placedShips;
 
-  @VisibleForTesting
-  Board() {
-    this.currentID = 1;
-    this.placedShips = new HashMap<>();
-  }
-
   public Board(int width, int height) {
     int largestShipSize = ShipType.getLargestShipSize();
     Preconditions.checkArgument(width >= largestShipSize && height >= largestShipSize,
@@ -48,8 +42,8 @@ public class Board {
     currentID = 1;
     placedShips.clear();
 
-    for (int i = 0; i < getFields().length; i++) {
-      getFields()[i] = 0;
+    for (int i = 0; i < fields.length; i++) {
+      fields[i] = 0;
     }
   }
 
@@ -61,12 +55,12 @@ public class Board {
 
   public int getShipIDAt(int x, int y) {
     checkCoordinates(x, y);
-    return getFields()[y * getWidth() + x];
+    return fields[y * getWidth() + x];
   }
 
   public void setShipIDAt(int x, int y, int id) {
     checkCoordinates(x, y);
-    getFields()[y * getWidth() + x] = id;
+    fields[y * getWidth() + x] = id;
   }
 
   public void addShipToBoard(Ship ship) {
